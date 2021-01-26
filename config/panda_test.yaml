@@ -1,0 +1,35 @@
+panda: #namespace
+
+    # panda Task Realated parameters
+    n_actions: 3 # X+/-,Y+/-,Z+/-
+    n_observations: 3 # XYZ of the TCP and the distance from GOAL
+    position_ee_max: 1.0
+    position_ee_min: -1.0
+    #0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785
+    init_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
+      panda_joint1: 0.0
+      panda_joint2: -0.785
+      panda_joint3: 0.0
+      panda_joint4: -2.356
+      panda_joint5: 0.0
+      panda_joint6: 1.571
+      panda_joint7: 0.785
+
+    setup_ee_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
+      x: 0.398
+      y: 0.005
+      z: 0.65
+
+    goal_ee_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
+      x: 0.37 
+      y: 0.005
+      z: 0.59
+
+    position_delta: 0.1 # Increments of Decrements in the X/Y/Z positions each action step
+
+    step_punishment: -1
+    closer_reward: 10
+    impossible_movement_punishement: -100
+    reached_goal_reward: 100
+
+    max_distance: 3.0 # Maximum distance from EE to the desired GOAL EE
