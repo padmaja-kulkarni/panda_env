@@ -80,6 +80,7 @@ class PandaEnv(gym.Env):
         info = {'is_success' : done}
         reward = self._compute_reward(obs, done)
         self.cumulated_episode_reward += reward
+        #print("Total reward is", self.cumulated_episode_reward, "done is", done, obs, self.desired_position)
 
         rospy.logdebug("END STEP OpenAIROS")
 
@@ -290,7 +291,7 @@ class PandaEnv(gym.Env):
         """
         print("WAITING...for panda to get ready")
         import time
-        for i in range(10):
+        for i in range(2):
             current_joints = self.get_joints()
             joint_pos = current_joints.position
             print("JOINTS POS NOW="+str(joint_pos))
