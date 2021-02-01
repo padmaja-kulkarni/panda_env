@@ -63,6 +63,7 @@ class FakeReacher(gym.Env):
         self.obs[0] = self.init_array[0]
         self.obs[1] = self.init_array[1]
         self.obs[2] = self.init_array[2]
+        #print("Resetting env")
         return self.obs
     
     
