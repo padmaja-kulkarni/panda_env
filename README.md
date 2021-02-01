@@ -1,5 +1,7 @@
 # Franka Imeka Panda robot gym environment for Reinforcement Learning  [Panda + ROS + RL + RVIZ]
 
+**No hassle package for training your robot!**
+
 It is the environment to train the Franka Imeka Panda robot to reach a particular position with a gym interface. This code is sim2real compatible.
 
 [OpenAI ROS](http://wiki.ros.org/openai_ros) provides a detailed tutorial on how to create gym-style environments and use Openai's Baseline algorithms with them using the Gazebo simulator. 
