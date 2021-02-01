@@ -1,4 +1,4 @@
-# panda_env
+# panda_gym_environment
 
 It is the environment to train the Franka Imeka Panda robot to reach a particular position with a gym interface. This code is sim2real compatible.
 
