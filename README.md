@@ -1,4 +1,4 @@
-# panda_gym_environment
+# Franka Imeka Panda robot gym environment for Reinforcement Learning  [Panda + ROS + RL]
 
 It is the environment to train the Franka Imeka Panda robot to reach a particular position with a gym interface. This code is sim2real compatible.
 
