@@ -54,6 +54,7 @@ class FakeReacher(gym.Env):
         self.init_array = np.array([ 0.398 , 0.005, 0.65])
         self.max_away_frm_init_pose = 0.12
         self.desired_pose = np.array([ 0.33 , -0.005, 0.57])
+        self.pid_goal_pose = np.array([ 0.35 , -0.005, 0.57])
         self.obs = np.concatenate((self.init_array, self.desired_pose))
         self.mu, self.sigma = 0, 0.001
         
@@ -80,10 +81,15 @@ class FakeReacher(gym.Env):
         
         up_obs = copy.deepcopy(self.obs)[:3]
         
+        pid_pose_diff = self.pid_goal_pose - up_obs
         
-        up_obs[0] += action[0] * self.position_delta
-        up_obs[1] += action[1] * self.position_delta
-        up_obs[2] += action[2] * self.position_delta 
+        pid_pose_clipped = np.clip(pid_pose_diff, -self.position_delta/4., self.position_delta/4.)  
+        
+        #print(pid_pose_clipped, pid_pose_diff)      
+        
+        up_obs[0] += action[0] * self.position_delta/2. + pid_pose_clipped[0]
+        up_obs[1] += action[1] * self.position_delta/2. + pid_pose_clipped[1]
+        up_obs[2] += action[2] * self.position_delta/2. + pid_pose_clipped[2]
              
                 
         up_obs = np.clip(up_obs, self.init_array-self.max_away_frm_init_pose,\
