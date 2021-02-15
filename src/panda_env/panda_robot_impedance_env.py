@@ -28,6 +28,7 @@ from std_msgs.msg import String
 from geometry_msgs.msg import WrenchStamped
 
 
+
 class PandaEnv(gym.Env):
 
     def __init__(self, ros_ws_abspath, goal_tolerence, axis_offset, base_link, ee_link):
@@ -71,15 +72,11 @@ class PandaEnv(gym.Env):
         self.gripper_orientation = self.move_panda_object.get_gripper_quat()
         
         # Wait until it has reached its Sturtup Position
-        self.wait_panda_ready()
+        #self.wait_panda_ready()
         
     # PandaEnv virtual methods
     # ----------------------------
 
-    def _check_all_sensors_ready(self):
-        self._check_joint_states_ready()
-        
-        rospy.logdebug("ALL SENSORS READY")
     
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -125,12 +122,12 @@ class PandaEnv(gym.Env):
     
     def reset(self):
         rospy.loginfo("Reseting robot pose")
-        rospy.logdebug("Reseting RobotGazeboEnvironment")
+        rospy.logdebug("Reseting RobotEnvironment")
         self._reset_sim()
         self._init_env_variables()
         self._update_episode()
         obs = self._get_obs()
-        rospy.logdebug("END Reseting RobotGazeboEnvironment")
+        rospy.logdebug("END Reseting RobotEnvironment")
         return obs
 
     def close(self):
@@ -139,8 +136,8 @@ class PandaEnv(gym.Env):
         Use it for closing GUIS and other systems that need closing.
         :return:
         """
-        rospy.logdebug("Closing RobotGazeboEnvironment")
-        rospy.signal_shutdown("Closing RobotGazeboEnvironment")
+        rospy.logdebug("Closing RobotEnvironment")
+        rospy.signal_shutdown("Closing RobotEnvironment")
 
     def _update_episode(self):
         """
@@ -178,7 +175,7 @@ class PandaEnv(gym.Env):
     def _reset_sim(self):
         """Resets a simulation
         """
-        rospy.loginfo("RESET SIM START")
+        rospy.logdebug("RESET SIM START")
         self._set_init_pose()
         rospy.logdebug("RESET SIM END")
         #print("RESET SIM END")
@@ -218,9 +215,17 @@ class PandaEnv(gym.Env):
         return result
         
     def set_initial_pose(self, initial_pos):
+        """
+        Set initial robot pose from a dict.
+        
+        input: dict with x,y, z ee poses
+        output: True
+        
+        inside the code: Sends goal poses to robot using move_panda_object's set_initial_pose.
+        """
         initial_pos = np.array([[initial_pos['x'], initial_pos['y'], initial_pos['z']]])
-    
-        self.move_panda_object.set_pose(initial_pos)
+        #print("Trying to setup pose inital setup pose", initial_pos)
+        self.move_panda_object.set_initial_pose(initial_pos)
         
         return True
         
@@ -367,7 +372,7 @@ class MovePanda:
             return []
             pass       
         
-    def goal_pose_in_cart(self, goal_pos):
+    def goal_pose_in_cart(self, goal_pos, check=True):
         curr_pose = []
         #print('getting tf data')
         '''
@@ -375,42 +380,58 @@ class MovePanda:
                               goal_pose.pose.orientation.x, goal_pose.pose.orientation.y, goal_pose.pose.orientation.z,
                               goal_pose.pose.orientation.w]])
         '''
-        while len(curr_pose) == 0:
-            curr_pose = self.getTFdata()
-        print('Got tf data',goal_pos, curr_pose )
-        goal_pose_t = goal_pos - curr_pose[0, :3]
-        
-        #print( "actual goal pose: goal_pose_t", goal_pose_t)
-        goal_pose_t_offset = copy.deepcopy(goal_pose_t)
-        
-        for i in range(goal_pose_t.shape[1]):
-            if goal_pose_t[0][i] <= self.axis_offset and goal_pose_t[0][i] >= -self.axis_offset:
-                pass
-            else:
-                goal_pose_t_offset[0][i] = np.copysign(self.axis_offset, goal_pose_t[0][i])
-                      
-        #print( "Later goal pose: goal_pose_t", goal_pose_t_offset)
-        
-        #if True: #np.linalg.norm(goal_pose_t, 1) > self.goal_offset:
-        goal = PoseStamped()
-        goal.header.seq = 1
-        goal.header.stamp = rospy.Time.now()
-        goal.header.frame_id = ''
-        goal.pose.position.x = curr_pose[0][0] + goal_pose_t_offset[0][0] 
-        goal.pose.position.y = curr_pose[0][1] + goal_pose_t_offset[0][1] 
-        goal.pose.position.z = curr_pose[0][2] + goal_pose_t_offset[0][2]
-        
-        gripper_orientation = self.get_gripper_quat()
-        goal.pose.orientation.x = gripper_orientation[0]
-        goal.pose.orientation.y = gripper_orientation[1]
-        goal.pose.orientation.z = gripper_orientation[2]
-        goal.pose.orientation.w = gripper_orientation[3]
-        #print("Publishing goal")
+        if check:
+            while len(curr_pose) == 0:
+                curr_pose = self.getTFdata()
+            #print('Got tf data',goal_pos, curr_pose )
+            goal_pose_t = goal_pos - curr_pose[0, :3]
+            
+            #print( "actual goal pose: goal_pose_t", goal_pose_t)
+            goal_pose_t_offset = copy.deepcopy(goal_pose_t)
+            
+            for i in range(goal_pose_t.shape[1]):
+                if goal_pose_t[0][i] <= self.axis_offset and goal_pose_t[0][i] >= -self.axis_offset:
+                    pass
+                else:
+                    goal_pose_t_offset[0][i] = np.copysign(self.axis_offset, goal_pose_t[0][i])
+                          
+            #print( "Later goal pose: goal_pose_t", goal_pose_t_offset)
+            goal = PoseStamped()
+            goal.header.seq = 1
+            goal.header.stamp = rospy.Time.now()
+            goal.header.frame_id = ''
+            goal.pose.position.x = curr_pose[0][0] + goal_pose_t_offset[0][0] 
+            goal.pose.position.y = curr_pose[0][1] + goal_pose_t_offset[0][1] 
+            goal.pose.position.z = curr_pose[0][2] + goal_pose_t_offset[0][2]
+            
+            gripper_orientation = curr_pose[0][3:]  #self.get_gripper_quat()
+            goal.pose.orientation.x = gripper_orientation[0]
+            goal.pose.orientation.y = gripper_orientation[1]
+            goal.pose.orientation.z = gripper_orientation[2]
+            goal.pose.orientation.w = gripper_orientation[3]
+            
+        else:
+            while len(curr_pose) == 0:
+                curr_pose = self.getTFdata()
+                
+            goal = PoseStamped()
+            goal.header.seq = 1
+            goal.header.stamp = rospy.Time.now()
+            goal.header.frame_id = ''
+            goal.pose.position.x = goal_pos[0][0]
+            goal.pose.position.y = goal_pos[0][1]
+            goal.pose.position.z = goal_pos[0][2]
+            
+            gripper_orientation = curr_pose[0][3:]  #self.get_gripper_quat()
+            goal.pose.orientation.x = gripper_orientation[0]
+            goal.pose.orientation.y = gripper_orientation[1]
+            goal.pose.orientation.z = gripper_orientation[2]
+            goal.pose.orientation.w = gripper_orientation[3]
+              
+        print("Publishing goal, ", check)
         self.goal_publisher.publish(goal)
         
-        return self.goal_reached(np.array([[goal.pose.position.x, goal.pose.position.y, goal.pose.position.z,
-                                       goal.pose.orientation.x, goal.pose.orientation.y, goal.pose.orientation.z, 
-                                       goal.pose.orientation.w]]).reshape(1,-1))
+        return self.goal_reached(np.array(goal_pos).reshape(1,-1))
             
             
     def goal_reached(self, goal_pose): #padmaja may be change this tolerance
@@ -418,31 +439,50 @@ class MovePanda:
         #print('getting tf data in pub goal_reached')
         while len(curr_pose) == 0:
             curr_pose = self.getTFdata()
-        #print("dist is", (curr_pose[0,:3]- goal_pose[0,:3]), curr_pose[0,:3], goal_pose[0,:3], tolerence_pos )
+        #print("dist is", (curr_pose[0,:3]- goal_pose[0,:3]), curr_pose[0,:3], goal_pose[0,:3] )
         if np.allclose(curr_pose[0,:3], goal_pose[0,:3], atol=self.goal_tolerence):#and np.allclose(curr_pose[0,3:], goal_pose[0,3:], tolerence_quat):
             return True
         return False  
     
     def ee_traj(self, goal_pos, timesteps=1):
+        """
+        Used while setting end effector pose during step function. 
+        One can use to send the same goal pose message more than 1 time 
+        with timesteps variable.
+        
+        input: geometry_msgs.Pose
+        output: True
+        
+        inside the code: Publish goal message
+        """
         goal_pose = np.array([[goal_pos.position.x, goal_pos.position.y, goal_pos.position.z]])
         for i in range(timesteps):
-            self.goal_pose_in_cart(goal_pose)   
+            self.goal_pose_in_cart(goal_pose, check=False)   
             #print("Tring to reach the goal pose in ee_traj")  
             self.rate.sleep()    
         return True
         
-    def set_pose(self, goal_pose):
+    def set_initial_pose(self, goal_pose):
+        """
+        Used to set initial pose of the robot with a never ending loop. 
+        
+        It is important to have the same goal pose for every experiment. 
+        
+        input: geometry_msgs.Pose
+        output: True
+        
+        inside the code: Publish goal message until the goal position is reached.
+                
+        """
         reached =  self.goal_pose_in_cart(goal_pose)
+        #print("In set pose loop, ", goal_pose, reached )
         while not reached:
             reached = self.goal_pose_in_cart(goal_pose)
-            #print("Tring to reach the goal pose")
+            print("Tring to reach the goal pose")
             self.rate.sleep()
+        print("", goal_pose)
+        print("Reached>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", goal_pose)
         return reached
-            
-    def execute_trajectory(self):
-        self.goal_pose_in_cart(self, goal_pos)   
-        #print("Tring to reach the goal pose in execute_trajectory")     
-        return True
 
     def ee_pose(self):
         curr_pose = []
