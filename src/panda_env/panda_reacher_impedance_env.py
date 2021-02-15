@@ -39,26 +39,31 @@ def LoadYamlFileParamsTest(rospackage_name, rel_path_from_package_to_file, yaml_
         rosparam.upload_params(ns,params)
 
 class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
+    
     def __init__(self):
         
         ros_ws_abspath = rospy.get_param("/panda/ros_ws_abspath", '/home/padmaja/ros/')
-        assert ros_ws_abspath is not None, "You forgot to set ros_ws_abspath in your yaml file of your main RL script. Set ros_ws_abspath: \'YOUR/SIM_WS/PATH\'"
+        assert ros_ws_abspath is not None, "You forgot to set ros_ws_abspath in your \
+        yaml file of your main RL script. Set ros_ws_abspath: \'YOUR/SIM_WS/PATH\'"
         assert os.path.exists(ros_ws_abspath), "The Simulation ROS Workspace path " + ros_ws_abspath + \
                                                " DOESNT exist, execute: mkdir -p " + ros_ws_abspath + \
                                                "/src;cd " + ros_ws_abspath + ";catkin_make"
         
         
-        super(PandaImpedanceEnv, self).__init__(ros_ws_abspath)
+        
         
         # Load Params from the desired Yaml file relative to this TaskEnvironment
         LoadYamlFileParamsTest(rospackage_name="panda_env",
                                rel_path_from_package_to_file="config",
                                yaml_file_name="panda_impedence_env.yaml")
         rospy.logdebug("Entered PandaTestEnv Env from reacher node")
+        
         self.get_params()
         
         #panda_env.PandaEnv.__init__(self)
-
+        super(PandaImpedanceEnv, self).__init__(ros_ws_abspath, self.tolerence, self.tolerence, self.base_link, self.ee_link)
+        
+        self.gripper_rotation = self.get_gripper_orientation() #[0.924, -0.382, 0.000, 0.000]
 
         #self.action_space = spaces.Box(low=-0.04, high=0.04, shape=(self.n_actions,), dtype=np.float32) #padmaja might need to change it to cont.
         self.action_space = spaces.Discrete(self.n_actions)
@@ -74,10 +79,6 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         self.observation_space = spaces.Box(observations_low_range, observations_high_range)
         
         print("\n\n\nShape is of obs and action", observations_high_range.shape, self.action_space)
-        
-        
-        
-        
         
         
 
@@ -108,7 +109,8 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         self.desired_position = [self.goal_ee_pos["x"], self.goal_ee_pos["y"], self.goal_ee_pos["z"]]
         
-        self.gripper_rotation = self.get_gripper_orientation() #[0.924, -0.382, 0.000, 0.000]
+        self.base_link = rospy.get_param('panda/base_link')
+        self.ee_link = rospy.get_param('panda/ee_link')
         
         
     
