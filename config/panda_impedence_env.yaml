@@ -2,11 +2,11 @@ panda: #namespace
 
     # panda Task Realated parameters
     n_actions: 6 # X+/-,Y+/-,Z+/-
-    n_observations: 9 # Forces, current pose
+    n_observations: 12 # Forces, current pose
     position_ee_max: 1.0
     position_ee_min: -1.0
     base_link: 'panda_link0'
-    ee_link: 'panda_link7' #####CHange this
+    ee_link: 'panda_link7'   #########################Change this
     #0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785
     init_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
       panda_joint1: 0.0
@@ -44,6 +44,6 @@ panda: #namespace
     max_away_frm_init_pose: 0.15 # allowed deviation from initial pose while moving
     
     
-    max_distance: 3.0 # Maximum distance from EE to the desired GOAL EE
+    #max_distance: 3.0 # Maximum distance from EE to the desired GOAL EE
     
     

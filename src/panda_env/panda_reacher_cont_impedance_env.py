@@ -114,7 +114,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         self.impossible_movement_punishement = rospy.get_param('/panda/impossible_movement_punishement')
         self.reached_goal_reward = rospy.get_param('/panda/reached_goal_reward')
         
-        self.max_distance = rospy.get_param('/panda/max_distance')
+        #self.max_distance = rospy.get_param('/panda/max_distance')
         
         self.goal_tolerence = rospy.get_param('/panda/goal_tolerence') #0.03
         #self.axis_tolerence = rospy.get_param('/panda/axis_tolerence') #max distance that a robot can go in each direction
@@ -217,6 +217,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         grip_pos = self.get_ee_pose()
         grip_pos_array = np.array([grip_pos.pose.position.x, grip_pos.pose.position.y, grip_pos.pose.position.z])
+        
         force_array = self.getForce()
         if force_array == None:
             force_array = np.zeros((6,1))
@@ -229,6 +230,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         #print("grip_pos_array,", grip_pos_array,  force_array)
         obs = np.concatenate((grip_pos_array.flatten(), force_array.flatten()))
+        obs = np.concatenate((obs, self.pid_goal_pose))
         
         self.curr_gripper_pose = copy.deepcopy(grip_pos_array)
         
