@@ -104,7 +104,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         self.max_distance = rospy.get_param('/panda/max_distance')
         
-        self.tolerence = rospy.get_param('/panda/tolerence') #0.03
+        self.tolerence = rospy.get_param('/panda/goal_tolerence') #0.03
         self.max_away_frm_init_pose = rospy.get_param('/panda/max_away_frm_init_pose')  #0.2
         
         self.desired_position = [self.goal_ee_pos["x"], self.goal_ee_pos["y"], self.goal_ee_pos["z"]]
