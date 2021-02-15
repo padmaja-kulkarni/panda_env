@@ -42,8 +42,12 @@ class PandaEnv(gym.Env):
         # Set up ROS related variables
         self.episode_num = 0
         self.cumulated_episode_reward = 0
-        self.reward_pub = rospy.Publisher('/openai/reward', RLExperimentInfo, queue_size=1)     
-                
+        self.reward_pub = rospy.Publisher('/openai/reward', RLExperimentInfo, queue_size=1)
+        """
+        ======================================================================================================
+         Hardcoaded variables
+        =====================================================================================================
+        """
         self.JOINT_STATES_SUBSCRIBER = '/joint_states'
         self.join_names = ["panda_joint1",
                           "panda_joint2",
@@ -51,6 +55,10 @@ class PandaEnv(gym.Env):
                           "panda_joint4",
                           "panda_joint5",
                           "panda_joint6", "panda_joint7"]
+        self.base_link = 'panda_link0' #'panda_link0' 
+        self.ee_link = 'panda_EE'
+        self.goal_tolerence = 0.03 #Goal is reached when distances along all axis fall in this range.
+        self.axis_offset = 0.02 #Maximum movement in a single timestep
                 
         self.joint_states_sub = rospy.Subscriber(self.JOINT_STATES_SUBSCRIBER, JointState, self.joints_callback)
         
@@ -58,10 +66,7 @@ class PandaEnv(gym.Env):
         
         # Start Services
         
-        self.base_link = 'panda_link0' #'panda_link0' 
-        self.ee_link = 'panda_EE'
-        
-        self.move_panda_object = MovePanda(self.base_link, self.ee_link)
+        self.move_panda_object = MovePanda(self.base_link, self.ee_link, self.goal_tolerence, self.axis_offset)
         
         self.gripper_orientation = self.move_panda_object.get_gripper_quat()
         
@@ -330,14 +335,14 @@ class PandaEnv(gym.Env):
         
 class MovePanda:
     
-    def __init__(self, base_link, ee_link):
+    def __init__(self, base_link, ee_link, goal_tolerence, axis_offset):
         
         self.listener = tff.TransformListener()
          #'panda_link8' ##TODO check this
-        self.goal_tolerence = 0.03
+        self.goal_tolerence = goal_tolerence
         #self.max_away_frm_init_pose = 0.2 #rospy.get_param('/panda/max_away_frm_init_pose')
-        self.goal_offset = 0.02 #self.tolerence #0.03
-        self.axis_offset = 0.02 #self.tolerence #0.03
+        #self.goal_offset = 0.02 #self.tolerence #0.03
+        self.axis_offset = axis_offset #offset for max goal pose motion in a single timestep. 
         self.cart_pose_array = np.ones((1,3)) * self.axis_offset
         self.goal_publisher = rospy.Publisher("/equilibrium_pose", PoseStamped, queue_size =10)
         self.rate = rospy.Rate(20) # 10hz        
@@ -408,7 +413,7 @@ class MovePanda:
                                        goal.pose.orientation.w]]).reshape(1,-1))
             
             
-    def goal_reached(self, goal_pose, tolerence_pos=0.02, tolerence_quat=0.01): #padmaja may be change this tolerance
+    def goal_reached(self, goal_pose): #padmaja may be change this tolerance
         curr_pose = []
         #print('getting tf data in pub goal_reached')
         while len(curr_pose) == 0:
