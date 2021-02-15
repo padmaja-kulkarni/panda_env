@@ -72,15 +72,11 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         self.action_space = spaces.Box(low=low_act, high=high_act)
         #self.action_space = spaces.Discrete(self.n_actions)
         
-        observations_high_range = np.array([self.position_ee_max] * self.n_observations)
-        observations_low_range = np.array([self.position_ee_min] * self.n_observations)
+        observations_high_range = np.inf * np.ones(self.n_observations)
+        observations_low_range = -observations_high_range
         
-        #observations_high_dist = np.array([self.max_distance])
-        #observations_low_dist = np.array([0.0])
-        
-        #high = np.concatenate([observations_high_range, observations_high_dist])
-        #low = np.concatenate([observations_low_range, observations_low_dist])
         self.observation_space = spaces.Box(observations_low_range, observations_high_range)
+        
         self.curr_gripper_pose = None
         
         #print("\n\n\nShape is of obs and action", observations_high_range.shape, self.action_space.shape)
