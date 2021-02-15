@@ -30,7 +30,7 @@ from geometry_msgs.msg import WrenchStamped
 
 class PandaEnv(gym.Env):
 
-    def __init__(self, ros_ws_abspath):
+    def __init__(self, ros_ws_abspath, goal_tolerence, axis_offset, base_link, ee_link):
         rospy.logdebug("Entered Panda Env")
                 
         self.controllers_list = []
@@ -55,10 +55,10 @@ class PandaEnv(gym.Env):
                           "panda_joint4",
                           "panda_joint5",
                           "panda_joint6", "panda_joint7"]
-        self.base_link = 'panda_link0' #'panda_link0' 
-        self.ee_link = 'panda_EE'
-        self.goal_tolerence = 0.03 #Goal is reached when distances along all axis fall in this range.
-        self.axis_offset = 0.02 #Maximum movement in a single timestep
+        self.goal_tolerence = goal_tolerence #0.03 #Goal is reached when distances along all axis fall in this range.
+        self.axis_offset = axis_offset #0.02 #Maximum movement in a single timestep
+        self.base_link = base_link #'panda_link0' #'panda_link0' 
+        self.ee_link = ee_link #'panda_EE'
                 
         self.joint_states_sub = rospy.Subscriber(self.JOINT_STATES_SUBSCRIBER, JointState, self.joints_callback)
         
