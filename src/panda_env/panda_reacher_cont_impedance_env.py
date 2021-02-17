@@ -141,7 +141,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         """
         self.movement_result = self.set_initial_pose(self.setup_ee_pos) #padmaja
         
-        print("Gripper initial and setup poses are", self.curr_gripper_pose, self.setup_ee_pos)
+        #print("Gripper initial and setup poses are", self.curr_gripper_pose, self.setup_ee_pos)
         """
         Getting  the reached initial robot pose
         """
@@ -149,7 +149,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         self.last_gripper_target = np.array([grip_pos.pose.position.x, grip_pos.pose.position.y, grip_pos.pose.position.z])
         self.current_dist_from_des_pos_ee = self.calculate_distance_between(self.desired_position,self.last_gripper_target)
         
-        print("Init pose set")
+        #print("Init pose set")
         
 
 
@@ -172,16 +172,19 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         gripper_target = copy.deepcopy(self.curr_gripper_pose)
         
         #print(" self.pid_goal_pose")
+        #action[0] = 0.0
+        #action[1] = 0.0
+        #action[2] = 0.0
                 
         pid_pose_diff = self.pid_goal_pose - gripper_target
         
         pid_pose_clipped = np.clip(pid_pose_diff, -self.position_delta, self.position_delta)  
         
-        #print(pid_pose_clipped, pid_pose_diff)      
+        #print(pid_pose_clipped, pid_pose_diff, gripper_target)      
         
-        gripper_target[0] += action[0]  + pid_pose_clipped[0]
-        gripper_target[1] += action[1]  + pid_pose_clipped[1]
-        gripper_target[2] += action[2]  + pid_pose_clipped[2]
+        gripper_target[0] += action[0]/3.  + pid_pose_clipped[0]
+        gripper_target[1] += action[1]/3.  + pid_pose_clipped[1]
+        gripper_target[2] += action[2]/3.  + pid_pose_clipped[2]
     
         
         #gripper_target = gripper_target + np.random.normal(self.mu, self.sigma, up_obs.shape)
@@ -215,7 +218,8 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         grip_pos_array = np.array([grip_pos.pose.position.x, grip_pos.pose.position.y, grip_pos.pose.position.z])
         
         force_array = self.getForce()
-        if force_array == None:
+        #print("\n\n\nforce are:", force_array)
+        if force_array.any() == None:
             force_array = np.zeros((6,1))
         """
         ======================================================================================================
@@ -233,6 +237,8 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         #new_dist_from_des_pos_ee = self.calculate_distance_between(self.desired_position, grip_pos_array)
         
         #obs.append(new_dist_from_des_pos_ee)
+        
+        #print("Obs are:", obs)
         
         
         #print("\n\n\n\n\nn+++>>>>>>>>>>>>>grip_pos_array", np.array(grip_pos_array))
