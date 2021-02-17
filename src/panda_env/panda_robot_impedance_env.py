@@ -350,7 +350,7 @@ class MovePanda:
         self.axis_offset = axis_offset #offset for max goal pose motion in a single timestep. 
         self.cart_pose_array = np.ones((1,3)) * self.axis_offset
         self.goal_publisher = rospy.Publisher("/equilibrium_pose", PoseStamped, queue_size =10)
-        self.rate = rospy.Rate(20) # 10hz        
+        self.rate = rospy.Rate(10) # 10hz        
         rospy.Subscriber('/franka_state_controller/F_ext',
                                                     WrenchStamped, self.getForceCB, queue_size=1, tcp_nodelay=True)
         
@@ -428,7 +428,7 @@ class MovePanda:
             goal.pose.orientation.z = gripper_orientation[2]
             goal.pose.orientation.w = gripper_orientation[3]
               
-        print("Publishing goal, ", check)
+        #print("Publishing goal, ", check)
         self.goal_publisher.publish(goal)
         
         return self.goal_reached(np.array(goal_pos).reshape(1,-1))
@@ -478,10 +478,10 @@ class MovePanda:
         #print("In set pose loop, ", goal_pose, reached )
         while not reached:
             reached = self.goal_pose_in_cart(goal_pose)
-            print("Tring to reach the goal pose")
+            #print("Tring to reach the goal pose")
             self.rate.sleep()
-        print("", goal_pose)
-        print("Reached>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", goal_pose)
+        #print("", goal_pose)
+        #print("Reached>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", goal_pose)
         return reached
 
     def ee_pose(self):
