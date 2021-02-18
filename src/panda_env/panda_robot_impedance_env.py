@@ -31,7 +31,7 @@ from geometry_msgs.msg import WrenchStamped
 
 class PandaEnv(gym.Env):
 
-    def __init__(self, ros_ws_abspath, goal_tolerence, axis_offset, base_link, ee_link):
+    def __init__(self, ros_ws_abspath, goal_tolerence, axis_offset, base_link, ee_link, gripper_orientation):
         rospy.logdebug("Entered Panda Env")
                 
         self.controllers_list = []
@@ -64,12 +64,13 @@ class PandaEnv(gym.Env):
         self.joint_states_sub = rospy.Subscriber(self.JOINT_STATES_SUBSCRIBER, JointState, self.joints_callback)
         
         self.joints = JointState()
+        self.gripper_orientation = gripper_orientation
         
         # Start Services
         
-        self.move_panda_object = MovePanda(self.base_link, self.ee_link, self.goal_tolerence, self.axis_offset)
+        self.move_panda_object = MovePanda(self.base_link, self.ee_link, self.goal_tolerence, self.axis_offset, self.gripper_orientation)
         
-        self.gripper_orientation = self.move_panda_object.get_gripper_quat()
+        #self.move_panda_object.get_gripper_quat()
         
         # Wait until it has reached its Sturtup Position
         #self.wait_panda_ready()
@@ -331,7 +332,7 @@ class PandaEnv(gym.Env):
         raise NotImplementedError()
     
     def get_gripper_orientation(self):
-        self.gripper_orientation = self.move_panda_object.get_gripper_quat()
+        #self.gripper_orientation = self.move_panda_object.get_gripper_quat()
         return self.gripper_orientation
         
     def getForce(self):
@@ -340,7 +341,7 @@ class PandaEnv(gym.Env):
         
 class MovePanda:
     
-    def __init__(self, base_link, ee_link, goal_tolerence, axis_offset):
+    def __init__(self, base_link, ee_link, goal_tolerence, axis_offset, gripper_orientation):
         
         self.listener = tff.TransformListener()
          #'panda_link8' ##TODO check this
@@ -350,13 +351,14 @@ class MovePanda:
         self.axis_offset = axis_offset #offset for max goal pose motion in a single timestep. 
         self.cart_pose_array = np.ones((1,3)) * self.axis_offset
         self.goal_publisher = rospy.Publisher("/equilibrium_pose", PoseStamped, queue_size =10)
-        self.rate = rospy.Rate(10) # 10hz        
+        self.rate = rospy.Rate(15) # 10hz        
         rospy.Subscriber('/franka_state_controller/F_ext',
                                                     WrenchStamped, self.getForceCB, queue_size=1, tcp_nodelay=True)
         
         self.force = None
         self.base_link = base_link
         self.ee_link = ee_link
+        self.gripper_orientation = gripper_orientation
         
         
     def getForceCB(self, msg):
@@ -404,11 +406,11 @@ class MovePanda:
             goal.pose.position.y = curr_pose[0][1] + goal_pose_t_offset[0][1] 
             goal.pose.position.z = curr_pose[0][2] + goal_pose_t_offset[0][2]
             
-            gripper_orientation = curr_pose[0][3:]  #self.get_gripper_quat()
-            goal.pose.orientation.x = gripper_orientation[0]
-            goal.pose.orientation.y = gripper_orientation[1]
-            goal.pose.orientation.z = gripper_orientation[2]
-            goal.pose.orientation.w = gripper_orientation[3]
+            #gripper_orientation = curr_pose[0][3:]  #self.get_gripper_quat()
+            goal.pose.orientation.x = self.gripper_orientation[0]
+            goal.pose.orientation.y = self.gripper_orientation[1]
+            goal.pose.orientation.z = self.gripper_orientation[2]
+            goal.pose.orientation.w = self.gripper_orientation[3]
             
         else:
             while len(curr_pose) == 0:
@@ -422,11 +424,11 @@ class MovePanda:
             goal.pose.position.y = goal_pos[0][1]
             goal.pose.position.z = goal_pos[0][2]
             
-            gripper_orientation = curr_pose[0][3:]  #self.get_gripper_quat()
-            goal.pose.orientation.x = gripper_orientation[0]
-            goal.pose.orientation.y = gripper_orientation[1]
-            goal.pose.orientation.z = gripper_orientation[2]
-            goal.pose.orientation.w = gripper_orientation[3]
+            #gripper_orientation = curr_pose[0][3:]  #self.get_gripper_quat()
+            goal.pose.orientation.x = self.gripper_orientation[0]
+            goal.pose.orientation.y = self.gripper_orientation[1]
+            goal.pose.orientation.z = self.gripper_orientation[2]
+            goal.pose.orientation.w = self.gripper_orientation[3]
               
         #print("Publishing goal, ", check)
         self.goal_publisher.publish(goal)

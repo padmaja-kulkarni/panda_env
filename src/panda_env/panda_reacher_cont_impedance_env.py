@@ -61,7 +61,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         self.get_params()
         
         #panda_env.PandaEnv.__init__(self)
-        super(PandaImpedanceEnv, self).__init__(ros_ws_abspath, self.goal_tolerence, self.position_delta, self.base_link, self.ee_link)
+        super(PandaImpedanceEnv, self).__init__(ros_ws_abspath, self.goal_tolerence, self.position_delta, self.base_link, self.ee_link, self.gripper_orientation)
         
         self.gripper_rotation = self.get_gripper_orientation() #[0.924, -0.382, 0.000, 0.000]
 
@@ -114,12 +114,17 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         self.goal_tolerence = rospy.get_param('/panda/goal_tolerence') #0.03
         #self.axis_tolerence = rospy.get_param('/panda/axis_tolerence') #max distance that a robot can go in each direction
-        self.max_away_frm_init_pose = rospy.get_param('/panda/max_away_frm_init_pose')  #0.2
+        self.max_away_frm_init = rospy.get_param('/panda/max_away_frm_init_pose')  #0.2
+        self.max_away_frm_init_pose = np.array([self.max_away_frm_init["x"], self.max_away_frm_init["y"], self.max_away_frm_init["z"]])
+        
+        self.gripp_ori =  rospy.get_param('/panda/gripper_orientation')
+        self.gripper_orientation = np.array([self.gripp_ori["x"], self.gripp_ori["y"], self.gripp_ori["z"], self.gripp_ori["w"]])
         
         self.desired_position = [self.goal_ee_pos["x"], self.goal_ee_pos["y"], self.goal_ee_pos["z"]]
         
         self.base_link = rospy.get_param('panda/base_link')
         self.ee_link = rospy.get_param('panda/ee_link')
+        self.step_count = 0
         
         
     
@@ -164,6 +169,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         """
         rospy.logdebug("Init Env Variables...")
         rospy.logdebug("Init Env Variables...END")
+        self.step_count = 0
     
 
     def _set_action(self, action):
@@ -180,11 +186,19 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         pid_pose_clipped = np.clip(pid_pose_diff, -self.position_delta, self.position_delta)  
         
-        #print(pid_pose_clipped, pid_pose_diff, gripper_target)      
+        #print(pid_pose_clipped, pid_pose_diff, gripper_target) 
+        decay = (100.0 - self.step_count)/100.0 #0.5 #np.exp(-self.step_count/1.) #np.exp(-self.step_count/1.)
+        self.step_count += 1     
         
+        gripper_target[0] += action[0] * (1-decay) + pid_pose_clipped[0] * decay
+        gripper_target[1] += action[1]* (1-decay) + pid_pose_clipped[1] * decay
+        gripper_target[2] += action[2]* (1-decay) + pid_pose_clipped[2] * decay
+        
+        """
         gripper_target[0] += action[0]/3.  + pid_pose_clipped[0]
         gripper_target[1] += action[1]/3.  + pid_pose_clipped[1]
         gripper_target[2] += action[2]/3.  + pid_pose_clipped[2]
+        """
     
         
         #gripper_target = gripper_target + np.random.normal(self.mu, self.sigma, up_obs.shape)

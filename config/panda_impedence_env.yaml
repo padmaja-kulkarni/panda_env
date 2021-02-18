@@ -2,7 +2,7 @@ panda: #namespace
 
     # panda Task Realated parameters
     n_actions: 6 # X+/-,Y+/-,Z+/-
-    n_observations: 12 # Forces, current pose
+    n_observations: 12 # current pose, Forces, desired_pose
     position_ee_max: 3.0
     position_ee_min: -3.0
     base_link: 'panda_link0'
@@ -18,21 +18,27 @@ panda: #namespace
       panda_joint7: 0.785
 
     setup_ee_pos: # for moveit x: 0.307 y: 0.001 z: 0.697
-      x: 0.600
-      y: -0.025
-      z: 0.464
+      x: 0.561
+      y: -0.055
+      z: 0.532
             
     goal_ee_pos: # 0.769, -0.032, 0.454 for real robot, otherwise  x: 0.60    y: 0.162      z: 0.501
-      x: 0.768
-      y: -0.025
-      z: 0.464 
-      
+      x: 0.716
+      y: -0.055
+      z: 0.523
+    
     pid_goal_ee_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
-      x: 0.768
-      y: -0.025
-      z: 0.464
-
-    position_delta: 0.02 # axis_tolerence Increments of Decrements in the X/Y/Z positions each action step
+      x: 0.716
+      y: -0.055
+      z: 0.523
+      
+    gripper_orientation:
+       x: 0.786
+       y: -0.044
+       z: 0.617
+       w: -0.009
+       
+    position_delta: 0.04 # axis_tolerence Increments of Decrements in the X/Y/Z positions each action step
 
     step_punishment: -1
     closer_reward: -1
@@ -41,7 +47,11 @@ panda: #namespace
 
     goal_tolerence: 0.02 # tolerence between the goal pose
     axis_tolerence: 0.01 #max Not used
-    max_away_frm_init_pose: 0.2 # allowed deviation from initial pose while moving
+    max_away_frm_init_pose: 
+       x: 0.2 # allowed deviation from initial pose while moving
+       y: 0.04
+       z: 0.04
+    
     
     
     #max_distance: 3.0 # Maximum distance from EE to the desired GOAL EE
