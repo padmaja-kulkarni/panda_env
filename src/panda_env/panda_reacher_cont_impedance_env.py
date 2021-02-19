@@ -235,6 +235,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         #print("\n\n\nforce are:", force_array)
         if force_array.any() == None:
             force_array = np.zeros((6,1))
+        assert not np.all(force_array == 0.)
         """
         ======================================================================================================
         First three sould always be the gripper pose. It is used lated to determine curr_pose ####VVVIIIIIPPPPP
