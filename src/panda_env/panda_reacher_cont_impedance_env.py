@@ -78,7 +78,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         self.observation_space = spaces.Box(observations_low_range, observations_high_range)
         
         self.curr_gripper_pose = None
-        
+                
         #print("\n\n\nShape is of obs and action", observations_high_range.shape, self.action_space.shape)
         
         
@@ -124,6 +124,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         self.base_link = rospy.get_param('panda/base_link')
         self.ee_link = rospy.get_param('panda/ee_link')
+        self.filter_alpha = rospy.get_param('panda/filter_alpha', 0.8)
         self.step_count = 0
         
         
@@ -188,8 +189,8 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         #print(pid_pose_clipped, pid_pose_diff, gripper_target) 
         decay = (100.0 - self.step_count)/100.0 #0.5 #np.exp(-self.step_count/1.) #np.exp(-self.step_count/1.)
-        self.step_count += 1     
-        
+         
+
         gripper_target[0] += action[0] * (1-decay) + pid_pose_clipped[0] * decay
         gripper_target[1] += action[1]* (1-decay) + pid_pose_clipped[1] * decay
         gripper_target[2] += action[2]* (1-decay) + pid_pose_clipped[2] * decay
@@ -206,6 +207,19 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         gripper_target = np.clip(gripper_target, self.setup_ee_pos_array-self.max_away_frm_init_pose,\
                               self.setup_ee_pos_array+self.max_away_frm_init_pose)
         
+        
+        """
+        Filter
+        """
+        
+        if self.step_count == 0:
+            self.last_action = copy.deepcopy(gripper_target)
+        else:
+            gripper_target = self.filter_alpha * gripper_target + (1. - self.filter_alpha) * self.last_action
+            self.last_action = copy.deepcopy(gripper_target)
+        
+        
+        self.step_count += 1
         #print("Action target is", action)
         #print("Gripper target is", gripper_target)
         #print("pid_pose_clipped target is", pid_pose_clipped)        
