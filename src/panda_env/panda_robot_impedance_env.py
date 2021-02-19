@@ -413,8 +413,8 @@ class MovePanda:
             goal.pose.orientation.w = self.gripper_orientation[3]
             
         else:
-            while len(curr_pose) == 0:
-                curr_pose = self.getTFdata()
+            #while len(curr_pose) == 0:
+            #    curr_pose = self.getTFdata()
                 
             goal = PoseStamped()
             goal.header.seq = 1
