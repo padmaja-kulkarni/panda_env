@@ -18,39 +18,39 @@ panda: #namespace
       panda_joint7: 0.785
 
     setup_ee_pos: # for moveit x: 0.307 y: 0.001 z: 0.697
-      x: 0.621
-      y: -0.009
-      z: 0.526
+      x: 0.501
+      y: 0.004
+      z: 0.341
             
     goal_ee_pos: # 0.769, -0.032, 0.454 for real robot, otherwise  x: 0.60    y: 0.162      z: 0.501
-      x: 0.779
-      y: -0.009 
-      z: 0.526
+      x: 0.501
+      y: 0.004
+      z: 0.240
     
     pid_goal_ee_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
-      x: 0.779
-      y: 0.04 #variance
-      z: 0.526
+      x: 0.501
+      y: 0.044
+      z: 0.240
       
     gripper_orientation:
-       x: 0.741
-       y: -0.178
-       z: 0.628
-       w: 0.157
+       x: 1.000
+       y: -0.010
+       z: -0.021
+       w: -0.001
        
-    position_delta: 0.04 # axis_tolerence Increments of Decrements in the X/Y/Z positions each action step
+    position_delta: 0.04 # axis_tolerence Increments of Decrements in the X/Y/Z positions each action step #changed on 24th after filtering
 
     step_punishment: -1
     closer_reward: -1
     impossible_movement_punishement: -1
-    reached_goal_reward: 50
+    reached_goal_reward: 100
 
     goal_tolerence: 0.02 # tolerence between the goal pose
     axis_tolerence: 0.01 #max Not used
     max_away_frm_init_pose: 
-       x: 0.2 # allowed deviation from initial pose while moving
+       x: 0.08 # allowed deviation from initial pose while moving
        y: 0.08
-       z: 0.08
+       z: 0.2
     
     
     

@@ -204,8 +204,11 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         #gripper_target = gripper_target + np.random.normal(self.mu, self.sigma, up_obs.shape)
         
+        
         gripper_target = np.clip(gripper_target, self.setup_ee_pos_array-self.max_away_frm_init_pose,\
                               self.setup_ee_pos_array+self.max_away_frm_init_pose)
+        
+        gripper_target[2] = np.fmin(self.setup_ee_pos_array[2], gripper_target[2])
         
         
         """
