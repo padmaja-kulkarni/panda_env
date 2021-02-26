@@ -20,17 +20,17 @@ panda: #namespace
     setup_ee_pos: # for moveit x: 0.307 y: 0.001 z: 0.697
       x: 0.501
       y: 0.004
-      z: 0.341
+      z: 0.340
             
     goal_ee_pos: # 0.769, -0.032, 0.454 for real robot, otherwise  x: 0.60    y: 0.162      z: 0.501
       x: 0.501
       y: 0.004
-      z: 0.240
+      z: 0.220
     
     pid_goal_ee_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
       x: 0.501
       y: 0.044
-      z: 0.240
+      z: 0.220
       
     gripper_orientation:
        x: 1.000
@@ -48,8 +48,8 @@ panda: #namespace
     goal_tolerence: 0.02 # tolerence between the goal pose
     axis_tolerence: 0.01 #max Not used
     max_away_frm_init_pose: 
-       x: 0.08 # allowed deviation from initial pose while moving
-       y: 0.08
+       x: 0.05 # allowed deviation from initial pose while moving
+       y: 0.05
        z: 0.2
     
     

@@ -188,7 +188,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         pid_pose_clipped = np.clip(pid_pose_diff, -self.position_delta, self.position_delta)  
         
         #print(pid_pose_clipped, pid_pose_diff, gripper_target) 
-        decay = (100.0 - self.step_count)/100.0 #0.5 #np.exp(-self.step_count/1.) #np.exp(-self.step_count/1.)
+        decay = (100.0 - self.step_count)/100.0#np.exp(-self.step_count/50.0) #(100.0 - self.step_count)/100.0 #0.5 # #np.exp(-self.step_count/1.)
          
 
         gripper_target[0] += action[0] * (1-decay) + pid_pose_clipped[0] * decay
@@ -208,7 +208,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         gripper_target = np.clip(gripper_target, self.setup_ee_pos_array-self.max_away_frm_init_pose,\
                               self.setup_ee_pos_array+self.max_away_frm_init_pose)
         
-        gripper_target[2] = np.fmin(self.setup_ee_pos_array[2], gripper_target[2])
+        gripper_target[2] = np.fmin(0.295, gripper_target[2])
         
         
         """
