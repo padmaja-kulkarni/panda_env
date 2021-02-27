@@ -29,8 +29,15 @@ panda: #namespace
     
     pid_goal_ee_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
       x: 0.501
-      y: 0.044
+      y: 0.004
       z: 0.220
+    
+    noise:
+      mu : 0.0
+      sigma : 0.02
+     
+     
+    add_noise : True
       
     gripper_orientation:
        x: 1.000
@@ -38,7 +45,7 @@ panda: #namespace
        z: -0.021
        w: -0.001
        
-    position_delta: 0.04 # axis_tolerence Increments of Decrements in the X/Y/Z positions each action step #changed on 24th after filtering
+    position_delta: 0.06 # axis_tolerence Increments of Decrements in the X/Y/Z positions each action step #changed on 24th after filtering
 
     step_punishment: -1
     closer_reward: -1
@@ -48,8 +55,8 @@ panda: #namespace
     goal_tolerence: 0.02 # tolerence between the goal pose
     axis_tolerence: 0.01 #max Not used
     max_away_frm_init_pose: 
-       x: 0.05 # allowed deviation from initial pose while moving
-       y: 0.05
+       x: 0.04 # allowed deviation from initial pose while moving
+       y: 0.04
        z: 0.2
     
     

@@ -102,7 +102,15 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         self.pid_goal = rospy.get_param('/panda/pid_goal_ee_pos')
         
-        self.pid_goal_pose = np.array([self.pid_goal["x"],self.pid_goal["y"],self.pid_goal["z"]])
+        self.pid_goal_pose_original = np.array([self.pid_goal["x"],self.pid_goal["y"],self.pid_goal["z"]])
+        
+        self.add_noise = rospy.get_param('/panda/add_noise')
+        if self.add_noise:
+            print("Adding noise")
+            self.noise = rospy.get_param('/panda/noise')
+            self.pid_goal_pose = self.pid_goal_pose_original + np.random.normal(self.noise['mu'], self.noise['sigma'], self.pid_goal_pose_original.shape)
+            print("pid_goal_pose", self.pid_goal_pose )
+        
         
         self.position_delta = rospy.get_param('/panda/position_delta')
         self.step_punishment = rospy.get_param('/panda/step_punishment')
@@ -171,6 +179,11 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         rospy.logdebug("Init Env Variables...")
         rospy.logdebug("Init Env Variables...END")
         self.step_count = 0
+        if self.add_noise:
+            #print("Adding noise")
+            #self.noise = rospy.get_param('/panda/noise')
+            self.pid_goal_pose = self.pid_goal_pose_original + np.random.normal(self.noise['mu'], self.noise['sigma'], self.pid_goal_pose_original.shape)
+            print("pid_goal_pose", self.pid_goal_pose )
     
 
     def _set_action(self, action):
@@ -179,9 +192,9 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         gripper_target = copy.deepcopy(self.curr_gripper_pose)
         
         #print(" self.pid_goal_pose")
-        #action[0] = 0.0
-        #action[1] = 0.0
-        #action[2] = 0.0
+        action[0] = 0.0
+        action[1] = 0.0
+        action[2] = 0.0
                 
         pid_pose_diff = self.pid_goal_pose - gripper_target
         
@@ -190,6 +203,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         #print(pid_pose_clipped, pid_pose_diff, gripper_target) 
         decay = (100.0 - self.step_count)/100.0#np.exp(-self.step_count/50.0) #(100.0 - self.step_count)/100.0 #0.5 # #np.exp(-self.step_count/1.)
          
+        
 
         gripper_target[0] += action[0] * (1-decay) + pid_pose_clipped[0] * decay
         gripper_target[1] += action[1]* (1-decay) + pid_pose_clipped[1] * decay
