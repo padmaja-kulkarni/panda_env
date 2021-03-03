@@ -133,6 +133,9 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         self.base_link = rospy.get_param('panda/base_link')
         self.ee_link = rospy.get_param('panda/ee_link')
         self.filter_alpha = rospy.get_param('panda/filter_alpha', 0.8)
+        self.use_rl = rospy.get_param('panda/use_rl', True)
+        print("using RL is set to:", self.use_rl )
+        self.gripper_z_max = rospy.get_param('panda/gripper_z_max', 0.295)
         self.step_count = 0
         
         
@@ -192,9 +195,10 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         gripper_target = copy.deepcopy(self.curr_gripper_pose)
         
         #print(" self.pid_goal_pose")
-        action[0] = 0.0
-        action[1] = 0.0
-        action[2] = 0.0
+        if not self.use_rl :
+            action[0] = 0.0
+            action[1] = 0.0
+            action[2] = 0.0
                 
         pid_pose_diff = self.pid_goal_pose - gripper_target
         
@@ -222,7 +226,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         gripper_target = np.clip(gripper_target, self.setup_ee_pos_array-self.max_away_frm_init_pose,\
                               self.setup_ee_pos_array+self.max_away_frm_init_pose)
         
-        gripper_target[2] = np.fmin(0.295, gripper_target[2])
+        gripper_target[2] = np.fmin(self.gripper_z_max, gripper_target[2])
         
         
         """

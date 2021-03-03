@@ -34,10 +34,12 @@ panda: #namespace
     
     noise:
       mu : 0.0
-      sigma : 0.02
+      sigma : 0.012
      
      
     add_noise : True
+    
+    use_rl : False
       
     gripper_orientation:
        x: 1.000
@@ -58,6 +60,8 @@ panda: #namespace
        x: 0.04 # allowed deviation from initial pose while moving
        y: 0.04
        z: 0.2
+       
+    gripper_z_max : 0.295
     
     
     
