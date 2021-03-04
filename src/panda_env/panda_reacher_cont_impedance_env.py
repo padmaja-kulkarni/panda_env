@@ -165,7 +165,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         grip_pos = self.get_ee_pose()
         self.last_gripper_target = np.array([grip_pos.pose.position.x, grip_pos.pose.position.y, grip_pos.pose.position.z])
         self.current_dist_from_des_pos_ee = self.calculate_distance_between(self.desired_position,self.last_gripper_target)
-        
+        self.curr_gripper_pose = np.array([grip_pos.pose.position.x, grip_pos.pose.position.y, grip_pos.pose.position.z])
         #print("Init pose set")
         
 
@@ -279,8 +279,9 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         """
         
         #print("grip_pos_array,", grip_pos_array,  force_array)
-        obs = np.concatenate((grip_pos_array.flatten(), force_array.flatten()))
-        obs = np.concatenate((obs, self.pid_goal_pose))
+        diff =  self.pid_goal_pose - grip_pos_array
+        obs = np.concatenate((diff.flatten(), force_array.flatten()))
+        #obs = np.concatenate((obs, self.pid_goal_pose))
         
         self.curr_gripper_pose = copy.deepcopy(grip_pos_array)
         
@@ -301,11 +302,11 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         It will also end if it reaches its goal.
         """
         #print("\n\n\n observations", observations)
-        current_pos = observations[:3]
+        #current_pos = observations[:3]
         
-        self.curr_gripper_pose = observations[:3]
+        #self.curr_gripper_pose = observations[:3]
         
-        done = self.calculate_if_done(self.movement_result,self.desired_position,current_pos)
+        done = self.calculate_if_done(self.movement_result, self.desired_position, self.curr_gripper_pose)
         if done:
             return 1
         else:
@@ -319,11 +320,11 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         Rewards getting to a position close to the goal.
         """
         #print("\n\n\n\n\n Current pose", observations)
-        current_pos = observations[:3]
+        #current_pos = observations[:3]
         
-        new_dist_from_des_pos_ee = self.calculate_distance_between(current_pos, self.desired_position)
+        new_dist_from_des_pos_ee = self.calculate_distance_between(self.curr_gripper_pose, self.desired_position)
         
-        reward = self.calculate_reward(self.movement_result, self.desired_position, current_pos, new_dist_from_des_pos_ee)
+        reward = self.calculate_reward(self.movement_result, self.desired_position, self.curr_gripper_pose, new_dist_from_des_pos_ee)
         rospy.logwarn(">>>REWARD>>>"+str(reward))
         
         return reward

@@ -2,7 +2,7 @@ panda: #namespace
 
     # panda Task Realated parameters
     n_actions: 6 # X+/-,Y+/-,Z+/-
-    n_observations: 12 # current pose, Forces, desired_pose
+    n_observations: 9 # current pose, Forces, desired_pose
     position_ee_max: 3.0
     position_ee_min: -3.0
     base_link: 'panda_link0'
@@ -34,7 +34,7 @@ panda: #namespace
     
     noise:
       mu : 0.0
-      sigma : 0.012
+      sigma : 0.01
      
      
     add_noise : True
