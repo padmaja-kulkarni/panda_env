@@ -50,8 +50,6 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
                                                "/src;cd " + ros_ws_abspath + ";catkin_make"
         
         
-        
-        
         # Load Params from the desired Yaml file relative to this TaskEnvironment
         LoadYamlFileParamsTest(rospackage_name="panda_env",
                                rel_path_from_package_to_file="config",
@@ -134,9 +132,11 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         self.ee_link = rospy.get_param('panda/ee_link')
         self.filter_alpha = rospy.get_param('panda/filter_alpha', 0.8)
         self.use_rl = rospy.get_param('panda/use_rl', True)
-        print("using RL is set to:", self.use_rl )
-        self.gripper_z_max = rospy.get_param('panda/gripper_z_max', 0.295)
+        print("\n\n\nsUsing RL is set to:", self.use_rl )
+        self.gripper_forward_max = rospy.get_param('panda/gripper_forward_max')
         self.step_count = 0
+        
+        self.hanging_setup = rospy.get_param('panda/hanging_setup')
         
         
     
@@ -156,7 +156,15 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         """
         Openrates in an infinite while loop until in initial end effector pose is reached.
         """
-        self.movement_result = self.set_initial_pose(self.setup_ee_pos) #padmaja
+        if self.add_noise:
+            init_diff = self.desired_position - self.setup_ee_pos_array
+            new_setup_pose = self.pid_goal_pose - init_diff
+            new_setup_pose = np.clip(new_setup_pose, self.setup_ee_pos_array-self.max_away_frm_init_pose,\
+                              self.setup_ee_pos_array+self.max_away_frm_init_pose)
+            print("new_setup_pose", new_setup_pose)
+            self.movement_result = self.set_initial_pose(new_setup_pose)
+        else:
+            self.movement_result = self.set_initial_pose(self.setup_ee_pos_array) #padmaja
         
         #print("Gripper initial and setup poses are", self.curr_gripper_pose, self.setup_ee_pos)
         """
@@ -194,6 +202,14 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         gripper_target = copy.deepcopy(self.curr_gripper_pose)
         
+        if self.hanging_setup:
+            """
+            Transferring action from insert to hanging scene
+            """
+            action[0] = -action[2]
+            action[2] = action[0]
+            
+        
         #print(" self.pid_goal_pose")
         if not self.use_rl :
             action[0] = 0.0
@@ -226,7 +242,11 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         gripper_target = np.clip(gripper_target, self.setup_ee_pos_array-self.max_away_frm_init_pose,\
                               self.setup_ee_pos_array+self.max_away_frm_init_pose)
         
-        gripper_target[2] = np.fmin(self.gripper_z_max, gripper_target[2])
+        if self.gripper_forward_max['min_max'] == 0:
+            gripper_target[self.gripper_forward_max['axis']] = np.fmin(self.gripper_forward_max['dist'], gripper_target[self.gripper_forward_max['axis']])
+        else:
+            gripper_target[self.gripper_forward_max['axis']] = np.fmax(self.gripper_forward_max['dist'], gripper_target[self.gripper_forward_max['axis']])
+            
         
         
         """
@@ -293,6 +313,26 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         
         
         #print("\n\n\n\n\nn+++>>>>>>>>>>>>>grip_pos_array", np.array(grip_pos_array))
+        
+        if self.hanging_setup:
+            """
+            Transferring observations from hanging to insert scene
+            """
+            filpped_obs  = copy.deepcopy(obs)
+            flipped_obs[0] =   obs[2]
+            flipped_obs[1] = obs[1]
+            flipped_obs[2] = - obs[0]
+            flipped_obs[3] = obs[5]
+            flipped_obs[4] = obs[4]
+            flipped_obs[5] = -obs[3]
+            flipped_obs[6] = obs[8]
+            flipped_obs[7] = obs[7]
+            flipped_obs[8] = -obs[6]
+            
+            obs = flipped_obs
+            
+            
+        
         return obs
         
     def _is_done(self, observations):

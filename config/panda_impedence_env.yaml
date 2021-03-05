@@ -1,7 +1,7 @@
 panda: #namespace
 
     # panda Task Realated parameters
-    n_actions: 6 # X+/-,Y+/-,Z+/-
+    n_actions: 3 # Continuous X, Y, Z
     n_observations: 9 # current pose, Forces, desired_pose
     position_ee_max: 3.0
     position_ee_min: -3.0
@@ -34,12 +34,11 @@ panda: #namespace
     
     noise:
       mu : 0.0
-      sigma : 0.01
-     
+      sigma : 0.01  
      
     add_noise : True
     
-    use_rl : False
+    use_rl : True
       
     gripper_orientation:
        x: 1.000
@@ -61,7 +60,12 @@ panda: #namespace
        y: 0.04
        z: 0.2
        
-    gripper_z_max : 0.295
+    gripper_forward_max : 
+       axis: 2
+       dist: 0.295
+       min_max: 0
+       
+    hanging_setup : False
     
     
     

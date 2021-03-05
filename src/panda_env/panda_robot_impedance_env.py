@@ -124,8 +124,8 @@ class PandaEnv(gym.Env):
     def reset(self):
         rospy.loginfo("Reseting robot pose")
         rospy.logdebug("Reseting RobotEnvironment")
-        self._reset_sim()
         self._init_env_variables()
+        self._reset_sim()
         self._update_episode()
         obs = self._get_obs()
         rospy.logdebug("END Reseting RobotEnvironment")
@@ -224,9 +224,9 @@ class PandaEnv(gym.Env):
         
         inside the code: Sends goal poses to robot using move_panda_object's set_initial_pose.
         """
-        initial_pos = np.array([[initial_pos['x'], initial_pos['y'], initial_pos['z']]])
+        #initial_pos = np.array([[initial_pos['x'], initial_pos['y'], initial_pos['z']]])
         #print("Trying to setup pose inital setup pose", initial_pos)
-        self.move_panda_object.set_initial_pose(initial_pos)
+        self.move_panda_object.set_initial_pose(initial_pos.reshape(1, -1))
         
         return True
         
