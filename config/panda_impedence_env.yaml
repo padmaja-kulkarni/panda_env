@@ -19,22 +19,22 @@ panda: #namespace
 
     setup_ee_pos: # for moveit x: 0.307 y: 0.001 z: 0.697
       x: 0.505
-      y: 0.002
+      y: -0.003
       z: 0.314
             
     goal_ee_pos: # 0.769, -0.032, 0.454 for real robot, otherwise  x: 0.60    y: 0.162      z: 0.501
       x: 0.505
-      y: 0.002
+      y: -0.003
       z: 0.194
     
     pid_goal_ee_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
       x: 0.505
-      y: 0.017
+      y: -0.003
       z: 0.194
     
     noise:
       mu : 0.0
-      sigma : 0.0
+      sigma : 0.015
      
     add_noise : True
     
@@ -62,7 +62,7 @@ panda: #namespace
        
     gripper_forward_max : 
        axis: 2
-       dist: 0.230
+       dist: 0.260
        min_max: 0
        
     hanging_setup : False
