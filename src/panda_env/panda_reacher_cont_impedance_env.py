@@ -49,7 +49,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
                                                " DOESNT exist, execute: mkdir -p " + ros_ws_abspath + \
                                                "/src;cd " + ros_ws_abspath + ";catkin_make"
         
-        
+    
         # Load Params from the desired Yaml file relative to this TaskEnvironment
         LoadYamlFileParamsTest(rospackage_name="panda_env",
                                rel_path_from_package_to_file="config",
@@ -107,6 +107,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
             print("Adding noise")
             self.noise = rospy.get_param('/panda/noise')
             self.pid_goal_pose = self.pid_goal_pose_original + np.random.normal(self.noise['mu'], self.noise['sigma'], self.pid_goal_pose_original.shape)
+            #self.pid_goal_pose[2] = self.pid_goal_pose_original[2]
             print("pid_goal_pose", self.pid_goal_pose )
         else:
             self.pid_goal_pose = copy.deepcopy(self.pid_goal_pose_original)
@@ -164,6 +165,8 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
             new_setup_pose = np.clip(new_setup_pose, self.setup_ee_pos_array-self.max_away_frm_init_pose,\
                               self.setup_ee_pos_array+self.max_away_frm_init_pose)
             print("new_setup_pose", new_setup_pose)
+            
+            #new_setup_pose[2] = self.setup_ee_pos_array[2]
             self.movement_result = self.set_initial_pose(new_setup_pose)
         else:
             self.movement_result = self.set_initial_pose(self.setup_ee_pos_array) #padmaja
@@ -196,6 +199,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
             #print("Adding noise")
             #self.noise = rospy.get_param('/panda/noise')
             self.pid_goal_pose = self.pid_goal_pose_original + np.random.normal(self.noise['mu'], self.noise['sigma'], self.pid_goal_pose_original.shape)
+            #self.pid_goal_pose[2] = self.pid_goal_pose_original[2]
             print("pid_goal_pose", self.pid_goal_pose )
     
 
@@ -223,7 +227,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         pid_pose_clipped = np.clip(pid_pose_diff, -self.position_delta, self.position_delta)  
         
         #print(pid_pose_clipped, pid_pose_diff, gripper_target) 
-        decay = (100.0 - self.step_count)/100. #0.10 #np.exp(-self.step_count/50.0) #(100.0 - self.step_count)/100.0 #0.5 # #np.exp(-self.step_count/1.)
+        decay = (100.0 - self.step_count)/100. #0.5  #0.10 #np.exp(-self.step_count/50.0) #(100.0 - self.step_count)/100.0 #0.5 # #np.exp(-self.step_count/1.)
         
 
         gripper_target[0] += action[0] * (1-decay) + pid_pose_clipped[0] * decay
