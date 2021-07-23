@@ -53,7 +53,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         # Load Params from the desired Yaml file relative to this TaskEnvironment
         LoadYamlFileParamsTest(rospackage_name="panda_env",
                                rel_path_from_package_to_file="config",
-                               yaml_file_name="panda_impedence_env.yaml")
+                           yaml_file_name="panda_impedence_env.yaml")
         rospy.logdebug("Entered PandaTestEnv Env from reacher node")
         
         self.get_params()
@@ -212,6 +212,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
             """
             Transferring action from insert to hanging scene
             """
+            #pass #padmaja
             action[0] = -action[2]
             action[2] = action[0]
             
@@ -325,6 +326,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
             """
             flipped_obs  = copy.deepcopy(obs)
             #print(flipped_obs.shape)
+            """
             flipped_obs[0] =   obs[2]
             flipped_obs[1] = obs[1]
             flipped_obs[2] = - obs[0]
@@ -334,6 +336,7 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
             flipped_obs[6] = obs[8]
             flipped_obs[7] = obs[7]
             flipped_obs[8] = -obs[6]
+            """
             
             obs = flipped_obs
             
@@ -382,6 +385,9 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
 
         if movement_result:
             position_similar = np.all(np.isclose(desired_position, current_pos, atol=self.goal_tolerence))
+            #if self.use_rl:
+            #    position_similar = 0.227> current_pos[0,2:] 
+                
             
             # Calculating Distance
             rospy.logwarn("desired_position="+str(desired_position))
@@ -422,6 +428,8 @@ class PandaImpedanceEnv(PandaEnv, utils.EzPickle):
         dist = self.calculate_distance_between(desired_position, current_pos)
         
         #print("Dist from goal is", dist, "Last action is", self.last_action )
+        #if self.use_rl:
+        #    return 0.227 > current_pos[0,2:]
             
         return np.all(np.isclose(desired_position, current_pos, atol=self.goal_tolerence))
         

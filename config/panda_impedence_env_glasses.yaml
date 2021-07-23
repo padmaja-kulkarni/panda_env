@@ -1,0 +1,74 @@
+panda: #namespace
+
+    # panda Task Realated parameters
+    n_actions: 3 # Continuous X, Y, Z
+    n_observations: 9 # current pose, Forces, desired_pose
+    position_ee_max: 3.0
+    position_ee_min: -3.0
+    base_link: 'panda_link0'
+    ee_link: 'panda_EE'   #########################Change this
+    #0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785
+    init_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
+      panda_joint1: 0.0
+      panda_joint2: -0.785
+      panda_joint3: 0.0
+      panda_joint4: -2.356
+      panda_joint5: 0.0
+      panda_joint6: 1.571
+      panda_joint7: 0.785
+
+    setup_ee_pos: # for moveit x: 0.307 y: 0.001 z: 0.697
+      x: 0.350
+      y: 0.13 # 0.009 0.13
+      z: 0.714
+      
+    goal_ee_pos: # 0.769, -0.032, 0.454 for real robot, otherwise  x: 0.60    y: 0.162      z: 0.501
+      x: 0.528
+      y: 0.13 # 0.009 0.13
+      z: 0.714
+    
+    pid_goal_ee_pos: # This has to be validated in the fetch_moveit_test.py in fetch_openai_ros_example or something that tests this pos is possible
+      x: 0.528
+      y: 0.16 # -0.041 0.16
+      z: 0.714
+       
+    noise:
+      mu : 0.0
+      sigma : 0.0
+      
+    add_noise : True
+    
+    use_rl : False
+    
+    gripper_orientation:
+       x: 0.723
+       y: -0.038
+       z: 0.688
+       w: -0.050
+       
+    position_delta: 0.05 # axis_tolerence Increments of Decrements in the X/Y/Z positions each action step #changed on 24th after filtering
+
+    step_punishment: -1
+    closer_reward: -1
+    impossible_movement_punishement: -1
+    reached_goal_reward: 100
+
+    goal_tolerence: 0.02 # tolerence between the goal pose
+    axis_tolerence: 0.01 #max Not used
+    max_away_frm_init_pose: 
+       x: 0.2 # allowed deviation from initial pose while moving
+       y: 0.05
+       z: 0.05
+       
+    gripper_forward_max : #gripper is not allowed to go behind this position after starting
+       axis: 0
+       dist: 0.350
+       min_max: 1
+       
+    hanging_setup : True
+    
+    
+    
+    #max_distance: 3.0 # Maximum distance from EE to the desired GOAL EE
+    
+    
